@@ -19,7 +19,7 @@
     }
     .add,.update{
         position:absolute;
-        width: 245px;
+        width: 256px;
         height: auto;
         top:50%;
         left:50%;
@@ -89,7 +89,7 @@
             <td><input type="text" name="" id="add_address"></td>
         </tr>
         <tr>
-            <td>E-mail：</td>
+            <td >E-mail：</td>
             <td><input type="text" name="" id="add_email"></td>
         </tr>
         <tr>
@@ -200,6 +200,7 @@
         })
     }
     function update($num){//更新
+        stop();
         $('.update').removeClass('none');
         $('#update_id').val($num);
         $(".update_error").children('p').text('右鍵取消!');
@@ -265,6 +266,7 @@
                 }
             })
         $('#add_show').click(function(){//新增顯示
+            stop();
             $('.add').removeClass('none');
             $(".add_error").children('p').text('右鍵取消');
             $(".add_error").fadeIn();
