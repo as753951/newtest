@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" referrerpolicy="no-referrer"></script>
+    <title>test</title>
+</head>
+<style>
+    .none{
+        display: none;
+    }
+    .container{
+        position:absolute;
+        top:20%;
+        left:50%;
+        transform: translate(-50%,-50%);
+    }
+    .add,.update{
+        position:absolute;
+        width: 245px;
+        height: auto;
+        top:50%;
+        left:50%;
+        transform: translate(-50%,-50%);
+        border: 1px black solid;
+        background-color: white;
+    }
+    .add_error,.update_error{
+        position:absolute;
+        width: auto;
+        top:-15%;
+        left:50%;
+        transform: translate(-50%,-50%);
+        border: 1px red solid;
+        background-color: white;
+    }
+    table,td{
+        word-break:break-all;
+    }
+</style>
+<body>
+<div class="container">
+    <table border="1">
+        <tr>
+            <th style='width:35px'>編號</th>
+            <th style='width:60px'>姓名</th>
+            <th style='width:35px'>性別</th>
+            <th style='width:90px'>電話</th>
+            <th style='width:200px'>地址</th>
+            <th style='width:200px'>E-mail</th>
+            <th style='width:45px'>修改</th>
+            <th style='width:45px'>刪除</th>
+        </tr>
+    </table>
+    <table class="data" border=""1"">
+    
+    </table>
+    <table border=""1"" style="width: 762px;">
+        <tr>
+            <td colspan="8" style="text-align:right;padding: 0.5rem;"><button id="add_show" type="button">新增</button></td>
+        </tr>
+    </table>
+</div>
+
+<div class='add none'>
+    <table border="1">
+        <tr>
+            <td>姓名：</td>
+            <td><input type="text" name="" id="add_name"></td>
+        </tr>
+        <tr>
+            <td>性別：</td>
+            <td>
+                <select id="add_gender">
+                    <option value="">請選擇</option>
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>電話：</td>
+            <td><input type="text" name="" id="add_phone" ></td>
+        </tr>
+        <tr>
+            <td>地址：</td>
+            <td><input type="text" name="" id="add_address"></td>
+        </tr>
+        <tr>
+            <td>E-mail：</td>
+            <td><input type="text" name="" id="add_email"></td>
+        </tr>
+        <tr>
+            <td><button id='add' style="width:100%">提交</button></td>
+        </tr>
+    </table>
+    <div class="add_error none">
+        <p></p>
+    </div>
+</div>
+<div class='update none'>
+    <form action="ajax/update.php" method="post" onsubmit="return update_check();">
+        <table border="1">
+            <tr>
+                <td>姓名：</td>
+                <td><input type="text" name="name" id="update_name"></td>
+            </tr>
+            <tr>
+                <td>性別：</td>
+                <td>
+                    <select id="update_gender" name="gender">
+                        <option value="">請選擇</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>電話：</td>
+                <td><input type="text" name="phone" id="update_phone" ></td>
+            </tr>
+            <tr>
+                <td>地址：</td>
+                <td><input type="text" name="address" id="update_address"></td>
+            </tr>
+            <tr>
+                <td>E-mail：</td>
+                <td><input type="text" name="email" id="update_email"></td>
+            </tr>
+            <tr>
+                <input type="hidden" id="update_id" name="id">
+                <td><input type='submit' style="width:100%" value="提交"></input></td>
+            </tr>
+        </table>
+    </form>
+    <div class="update_error none">
+        <p></p>
+    </div>
+</div>
+<script>
+    document.oncontextmenu = function(e){
+        return false;
+    }
+    function is_mobile(mobile) {//手機驗證
+        if( mobile == "") {
+            return true;
+        } else {
+        if( !/^(886)?09\d{8}$/.test(mobile)&&!/^(886)?0\d{1,2}-\d{8}$/.test(mobile)) {
+            return true;
+        }
+            return false;
+        }
+    }
+    function is_email(email) {//信箱驗證
+        if (email == "") {
+            return true;
+        } else {
+        if (!/^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email)) {
+            return true;
+        }
+        }
+            return false;
+    }
+    function stop(){//取消鍵
+        $('#add_name').val("");
+        $('#add_gender').val("");
+        $('#add_phone').val("");
+        $('#add_address').val("");
+        $('#add_email').val("");
+        $('.add').addClass('none');
+        $('.update').addClass('none');
+        }
+    function index(){//首頁
+        $('.data').children('tr').remove();
+        $.ajax({
+        type: "POST",
+        cache: false,
+        async:true,
+        url: 'ajax/index.php',
+        success:function(data){
+            $rows=data.split('*');
+            for($i=0;$i<$rows.length-1;$i++){
+                $row=$rows[$i].split('/');
+                $('.data').append(
+                    "<tr>"+
+                        "<td style='width:35px'>"+$row[0]+"</td>"+
+                        "<td style='width:60px'>"+$row[1]+"</td>"+
+                        "<td style='width:35px'>"+$row[2]+"</td>"+
+                        "<td style='width:90px'>"+$row[3]+"</td>"+
+                        "<td style='width:200px'>"+$row[4]+"</td>"+
+                        "<td style='width:200px'>"+$row[5]+"</td>"+
+                        "<td style='width:45px'><button onclick='update("+$row[0]+");' type='button'>修改</button></td>"+
+                        "<td style='width:45px'><form action='ajax/delete.php' method='post' onsubmit='return delete_check();'><input type='hidden' name='id' value='"+$row[0]+"'><input type='submit' value='刪除'></input></td>"+
+                    +"</tr>"
+                )
+            }
+        }
+        })
+    }
+    function update($num){//更新
+        $('.update').removeClass('none');
+        $('#update_id').val($num);
+        $(".update_error").children('p').text('右鍵取消!');
+        $(".update_error").fadeIn();
+        $(".update_error").fadeOut(3000);
+        $.ajax({
+            type: "POST",
+            cache: false,
+            async:true,
+            data:{id:$num},
+            url: 'ajax/show.php',
+            success:function(data){
+                $row=data.split('/')
+                $('#update_name').val($row[0]);
+                $('#update_gender').val($row[1]);
+                $('#update_phone').val($row[2]);
+                $('#update_address').val($row[3]);
+                $('#update_email').val($row[4]);
+            }
+        })
+    }
+    function update_check(){//更新驗證
+        if($('#update_name').val()==""){
+            $(".update_error").children('p').text('姓名不得為空值!');
+            $(".update_error").fadeIn();
+            $(".update_error").fadeOut(3000);
+            return false;;
+        }
+        if($('#update_gender').val()==""){
+            $(".update_error").children('p').text('請選擇性別!');
+            $(".update_error").fadeIn();
+            $(".update_error").fadeOut(3000);
+            return false;;
+        }
+        if(is_mobile($('#update_phone').val())){
+            $(".update_error").children('p').text('請輸入正確電話，座機請在區號後加-字符號!');
+            $(".update_error").fadeIn();
+            $(".update_error").fadeOut(3000);
+            return false;;
+        }
+        if($('#update_address').val()==""){
+            $(".update_error").children('p').text('地址不得為空值!');
+            $(".update_error").fadeIn();
+            $(".update_error").fadeOut(3000);
+            return false;;
+        }
+        if(is_email($('#update_email').val())){
+            $(".update_error").children('p').text('請輸入正確信箱!');
+            $(".update_error").fadeIn();
+            $(".update_error").fadeOut(3000);
+            return false;;
+        }
+        return true;
+    }
+    function delete_check(){//刪除驗證
+        return confirm('確認刪除？');
+    }
+    $(function(){
+        index();
+        $('body').mousedown(function(e){//右鍵取消
+                if(e.which==3){
+                    stop();
+                }
+            })
+        $('#add_show').click(function(){//新增顯示
+            $('.add').removeClass('none');
+            $(".add_error").children('p').text('右鍵取消');
+            $(".add_error").fadeIn();
+            $(".add_error").fadeOut(3000);
+        })
+        $('#add').click(function(){//新增驗證
+            if($('#add_name').val()==""){
+                $(".add_error").children('p').text('姓名不得為空值!');
+                $(".add_error").fadeIn();
+                $(".add_error").fadeOut(3000);
+                return;
+            }
+            if($('#add_gender').val()==""){
+                $(".add_error").children('p').text('請選擇性別!');
+                $(".add_error").fadeIn();
+                $(".add_error").fadeOut(3000);
+                return;
+            }
+            if(is_mobile($('#add_phone').val())){
+                $(".add_error").children('p').text('請輸入正確電話，座機請在區號後加-字符號!');
+                $(".add_error").fadeIn();
+                $(".add_error").fadeOut(3000);
+                return;
+            }
+            if($('#add_address').val()==""){
+                $(".add_error").children('p').text('地址不得為空值!');
+                $(".add_error").fadeIn();
+                $(".add_error").fadeOut(3000);
+                return;
+            }
+            if(is_email($('#add_email').val())){
+                $(".add_error").children('p').text('請輸入正確信箱!');
+                $(".add_error").fadeIn();
+                $(".add_error").fadeOut(3000);
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                cache: false,
+                async:true,
+                data:{name:$('#add_name').val(),gender:$('#add_gender').val(),phone:$('#add_phone').val(),address:$('#add_address').val(),email:$('#add_email').val()},
+                url: 'ajax/store.php',
+                success:function(data){
+                    index();
+                    stop();
+                }
+            })
+        })
+    })
+</script>
+</body>
+</html>
